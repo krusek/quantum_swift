@@ -19,7 +19,7 @@ final class quantum_swiftTests: XCTestCase {
     }
     
     func testTreeBorrow() {
-        let tree = RandomAccessTree<Int>.tree(0, .leaf(5), .leaf(3)).borrow()
+        let tree = RandomAccessTree<Int>.tree(0, .leaf(5), .leaf(3)).withBorrowed()
         XCTAssertEqual(tree[0], 5)
         XCTAssertEqual(tree[1], 3)
         XCTAssertEqual(tree[2], Int.zero)
@@ -28,10 +28,10 @@ final class quantum_swiftTests: XCTestCase {
     
     func testTreeBorrowSet() {
         let tree = RandomAccessTree<Int>.tree(0, .leaf(5), .leaf(3))
-            .borrow()
-            .set(index: 2, value: 8)
-            .borrow()
-            .set(index: 6, value: 12)
+            .withBorrowed()
+            .withSet(index: 2, value: 8)
+            .withBorrowed()
+            .withSet(index: 6, value: 12)
         XCTAssertEqual(tree[0], 5)
         XCTAssertEqual(tree[1], 3)
         XCTAssertEqual(tree[2], 8)
@@ -40,5 +40,33 @@ final class quantum_swiftTests: XCTestCase {
         XCTAssertEqual(tree[5], Int.zero)
         XCTAssertEqual(tree[6], 12)
         XCTAssertEqual(tree[7], Int.zero)
+    }
+    
+    func testPruning() {
+        let tree = RandomAccessTree<Int>.tree(0, .leaf(5), .leaf(3))
+            .withBorrowed()
+            .withSet(index: 2, value: 8)
+            .withSet(index: 0, value: 0)
+            .withSet(index: 1, value: 0)
+            .withSet(index: 2, value: 0)
+            .withBorrowed()
+            .withSet(index: 4, value: 1)
+            .withSet(index: 4, value: 0)
+        
+        switch tree {
+        case .tree(2, .zero, .zero):
+            break
+        default:
+            XCTFail("tree: \(tree)")
+        }
+        
+        switch tree.withBorrowed() {
+        case .tree(3, .zero, .zero):
+            break
+        default:
+            XCTFail("tree: \(tree.withBorrowed())")
+            
+        }
+        
     }
 }

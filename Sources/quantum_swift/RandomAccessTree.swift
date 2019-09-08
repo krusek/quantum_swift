@@ -9,7 +9,7 @@ public protocol HasZero {
 /// - tree: Depth indicates which bit to compare for indexes. The first subtree is the zero but and the second is the one bit.
 /// - zero: This means the subtree is not created, so everything below this tree uses the default value.
 /// - leaf: A value containing leaf
-public indirect enum RandomAccessTree<Node> where Node: HasZero {
+public indirect enum RandomAccessTree<Node> where Node: HasZero & Equatable {
     case tree(Int, RandomAccessTree, RandomAccessTree), zero, leaf(Node)
     
     public subscript(index: Int) -> Node {
@@ -29,20 +29,26 @@ public indirect enum RandomAccessTree<Node> where Node: HasZero {
         }
     }
     
-    public func set(index: Int, value: Node) -> RandomAccessTree<Node> {
+    @discardableResult
+    public mutating func set(index: Int, value: Node) -> RandomAccessTree<Node> {
+        self = self.setDepth(self.depth, index, value)
+        return self
+    }
+    
+    public func withSet(index: Int, value: Node) -> RandomAccessTree<Node> {
         return self.setDepth(self.depth, index, value)
     }
     
     private func setDepth(_ depth: Int, _ index: Int, _ value: Node) -> RandomAccessTree<Node> {
         switch self {
         case .tree(let d, let zero, let one) where index & (1 << d) == 0:
-            return .tree(d, zero.setDepth(depth - 1, index, value), one)
+            return .tree(d, zero.setDepth(depth - 1, index, value).pruned(), one)
         case .tree(let d, let zero, let one):
-            return .tree(d, zero, one.setDepth(depth - 1, index, value))
+            return .tree(d, zero, one.setDepth(depth - 1, index, value).pruned())
         case .leaf(_),
              .zero:
             if depth == -1 {
-                return .leaf(value)
+                return RandomAccessTree<Node>.leaf(value).pruned()
             } else {
                 return RandomAccessTree<Node>.tree(depth, .zero, .zero).setDepth(depth, index, value)
             }
@@ -50,8 +56,26 @@ public indirect enum RandomAccessTree<Node> where Node: HasZero {
         }
     }
     
-    public func borrow() -> RandomAccessTree<Node> {
-        return .tree(self.depth + 1, self, .zero)
+    private func pruned() -> RandomAccessTree<Node> {
+        switch self {
+        case .tree(_, .zero, .zero):
+            return .zero
+        case .leaf(let value) where value == .zero:
+            return .zero
+        default:
+            return self
+        }
+    }
+    
+    @discardableResult
+    public mutating func borrow() -> RandomAccessTree<Node> {
+        self = .tree(self.depth + 1, self.pruned(), .zero)
+        return self
+    }
+    
+    public func withBorrowed() -> RandomAccessTree<Node> {
+        var tree = self
+        return tree.borrow()
     }
     
     public var depth: Int {
