@@ -3,6 +3,14 @@ import Foundation
 public struct Complex {
     let real: Double
     let imaginary: Double
+    
+    public var magnitudeSquared: Double {
+        return real * real + imaginary * imaginary
+    }
+    
+    public func scale(by rhs: Double) -> Complex {
+        return self * rhs
+    }
 }
 
 extension Complex: AdditiveArithmetic {
