@@ -87,3 +87,17 @@ public indirect enum RandomAccessTree<Node> where Node: HasZero & Equatable {
         }
     }
 }
+
+extension RandomAccessTree: CustomStringConvertible where Node: CustomStringConvertible {
+    public var description: String {
+        let length = self.depth + 1
+        let max = 1 << length
+        let pieces = (1..<max).compactMap { (ix) -> String? in
+            guard self[ix] != .zero else { return nil }
+            let number = String(ix, radix: 2)
+            let monomial = String(repeating: "0", count: length - number.count) + number
+            return "(\(self[ix])) |\(monomial)>"
+        }
+        return pieces.joined(separator: " + ")
+    }
+}

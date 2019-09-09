@@ -13,6 +13,20 @@ public struct Complex {
     }
 }
 
+extension Complex: HasZero {
+    public static var zero: Complex {
+        return Complex(real: 0, imaginary: 0)
+    }
+    
+    public static var one: Complex {
+        return Complex(real: 1, imaginary: 0)
+    }
+    
+    public static var i: Complex {
+        return Complex(real: 0, imaginary: 1)
+    }
+}
+
 extension Complex: AdditiveArithmetic {
     public static func += (lhs: inout Complex, rhs: Complex) {
         lhs = lhs + rhs
@@ -24,10 +38,6 @@ extension Complex: AdditiveArithmetic {
     
     public static func - (lhs: Complex, rhs: Complex) -> Complex {
         return Complex(real: lhs.real - rhs.real, imaginary: lhs.imaginary - rhs.imaginary)
-    }
-    
-    public static var zero: Complex {
-        return Complex(real: 0, imaginary: 0)
     }
     
     public static func -= (lhs: inout Complex, rhs: Complex) {
@@ -49,6 +59,15 @@ extension Complex {
         return Complex(real: lhs.real / rhs, imaginary: lhs.imaginary / rhs)
     }
     
+}
+
+extension Complex: CustomStringConvertible {
+    public var description: String {
+        guard self != .zero else { return "0" }
+        let real = self.real != 0 ? "\(self.real)" : nil
+        let imag = self.imaginary != 0 ? "\(self.imaginary)i" : nil
+        return [real, imag].compactMap({ $0 }).joined(separator: " + ")
+    }
 }
 
 extension Complex: Equatable {

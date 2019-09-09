@@ -42,6 +42,20 @@ final class quantum_swiftTests: XCTestCase {
         XCTAssertEqual(tree[7], Int.zero)
     }
     
+    func testDescription() {
+        let tree = RandomAccessTree<Complex>
+            .tree(0,
+                  .leaf(Complex(real: sqrt(2), imaginary: sqrt(2))),
+                  .leaf(.i))
+            .withBorrowed()
+            .withSet(index: 2, value: .one)
+            .withSet(index: 0, value: .zero)
+            .withSet(index: 1, value: Complex(real: 1, imaginary: 3))
+            .withSet(index: 2, value: .one)
+        XCTAssertEqual(tree.description, "(1.0 + 3.0i) |01> + (1.0) |10>")
+        
+    }
+    
     func testPruning() {
         let tree = RandomAccessTree<Int>.tree(0, .leaf(5), .leaf(3))
             .withBorrowed()
@@ -67,6 +81,5 @@ final class quantum_swiftTests: XCTestCase {
             XCTFail("tree: \(tree.withBorrowed())")
             
         }
-        
     }
 }
