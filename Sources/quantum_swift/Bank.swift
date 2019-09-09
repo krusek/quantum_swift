@@ -2,14 +2,19 @@ import Foundation
 
 public struct Qubit {
     var index: Int
+
+    func isZero(_ index: Int) -> Bool {
+        return index & (1 << self.index) == 0
+    }
 }
 
 extension RandomAccessTree {
-    func pairedMap(_ index: Int, mapping: Operator<Node>) -> RandomAccessTree {
+    func pairedMap(_ index: Int, mapping: Operator<Node>, filter: (Int) -> Bool = { _ in true }) -> RandomAccessTree {
         var tree = self
         let mask = 1 << index
         for ix in 0..<(1<<tree.depth) {
             guard ix & mask == 0 else { continue }
+            guard filter(ix) else { continue }
             
             let oneIndex = ix | mask
             let zero = self[ix]
@@ -45,6 +50,15 @@ public class Bank {
     
     public func operate(qubit: Qubit, op: (Complex, Complex) -> (Complex, Complex)) {
         data = data.pairedMap(qubit.index, mapping: op)
+    }
+
+    public func operate(qubit: Qubit, controls: [Qubit], antiControls: [Qubit], op: (Complex, Complex) -> (Complex, Complex)) {
+        let filter: (Int) -> Bool = { ix  in
+            if !controls.allSatisfy({ !$0.isZero(ix) }) { return false }
+            if !antiControls.allSatisfy({ $0.isZero(ix) }) { return false }
+            return true
+        }
+        data = data.pairedMap(qubit.index, mapping: op, filter: filter)
     }
 }
 
