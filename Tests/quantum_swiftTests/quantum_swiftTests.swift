@@ -45,10 +45,9 @@ final class quantum_swiftTests: XCTestCase {
     func testDescription() {
         let tree = RandomAccessTree<Complex>
             .tree(0,
-                  .leaf(Complex(real: sqrt(2), imaginary: sqrt(2))),
-                  .leaf(.i))
+                  .leaf(.zero),
+                  .leaf(.zero))
             .withBorrowed()
-            .withSet(index: 2, value: .one)
             .withSet(index: 0, value: .zero)
             .withSet(index: 1, value: Complex(real: 1, imaginary: 3))
             .withSet(index: 2, value: .one)

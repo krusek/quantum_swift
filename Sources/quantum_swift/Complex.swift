@@ -43,6 +43,10 @@ extension Complex: AdditiveArithmetic {
     public static func -= (lhs: inout Complex, rhs: Complex) {
         lhs = lhs - rhs
     }
+    
+    public static prefix func -(lhs: Complex) -> Complex {
+        return lhs * (-1.0)
+    }
 }
 
 extension Complex {
