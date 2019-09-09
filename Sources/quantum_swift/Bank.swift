@@ -5,7 +5,7 @@ public struct Qubit {
 }
 
 extension RandomAccessTree {
-    func pairedMap(_ index: Int, mapping: (Node, Node) -> (Node, Node)) -> RandomAccessTree {
+    func pairedMap(_ index: Int, mapping: Operator<Node>) -> RandomAccessTree {
         var tree = self
         let mask = 1 << index
         for ix in 0..<(1<<tree.depth) {

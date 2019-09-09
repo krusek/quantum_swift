@@ -11,6 +11,16 @@ public struct Complex {
     public func scale(by rhs: Double) -> Complex {
         return self * rhs
     }
+
+    /// Create a Complex number from its polar representation.
+    ///
+    /// - Parameters:
+    ///   - r: The magnitude of the Complex
+    ///   - theta: The polar angle in radians
+    /// - Returns: A Complex number with the given magnitude and angle
+    public static func polar(r: Double, theta: Double) -> Complex {
+        return Complex(real: r * cos(theta), imaginary: r * sin(theta))
+    }
 }
 
 extension Complex: HasZero {

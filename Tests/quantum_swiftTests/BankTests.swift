@@ -12,24 +12,16 @@ class BankTests: XCTestCase {
     func testExample() {
         let bank = Bank()
         let qs = bank.borrow(count: 1)
-        let x: (Complex, Complex) -> (Complex, Complex) = { (zero, one) in
-            return (one, zero)
-        }
         bank.operate(qubit: qs[0], op: x)
-        print("bank: \(bank)")
+        XCTAssertEqual("\(bank)", "(1.0) |1>")
         bank.operate(qubit: qs[0], op: x)
-        print("bank: \(bank)")
-        let h: (Complex, Complex) -> (Complex, Complex) = { (zero, one) in
-            return ((one + zero) / sqrt(2), (zero - one) / sqrt(2))
-        }
+        XCTAssertEqual("\(bank)", "(1.0) |0>")
+
         bank.operate(qubit: qs[0], op: x)
         bank.operate(qubit: qs[0], op: h)
-        print("bank: \(bank)")
+        XCTAssertEqual("\(bank)", "(0.7071067811865475) |0> + (-0.7071067811865475) |1>")
         
-        let z: (Complex, Complex) -> (Complex, Complex) = { (zero, one) in
-            return (zero, -one)
-        }
         bank.operate(qubit: qs[0], op: z)
-        print("bank: \(bank)")
+        XCTAssertEqual("\(bank)", "(0.7071067811865475) |0> + (0.7071067811865475) |1>")
     }
 }
