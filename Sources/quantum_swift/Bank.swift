@@ -8,8 +8,8 @@ public struct Qubit {
     }
 }
 
-extension RandomAccessTree {
-    func pairedMap(_ index: Int, mapping: Operator<Node>, filter: (Int) -> Bool = { _ in true }) -> RandomAccessTree {
+extension RandomAccessTree where Node == Complex {
+    func pairedMap(_ index: Int, mapping: Operator<Complex>, filter: (Int) -> Bool = { _ in true }) -> RandomAccessTree {
         var tree = self
         let mask = 1 << index
         for ix in 0..<(1<<tree.depth) {
@@ -26,6 +26,14 @@ extension RandomAccessTree {
             tree = tree.set(index: oneIndex, value: newOne)
         }
         return tree
+    }
+    
+    static func - (lhs: RandomAccessTree, rhs: RandomAccessTree) -> RandomAccessTree {
+        var r = (lhs.depth > rhs.depth) ? lhs : rhs
+        for ix in 0..<(1 << r.depth) {
+            r.set(index: ix, value:lhs[ix] - rhs[ix])
+        }
+        return r
     }
 }
 
@@ -59,6 +67,10 @@ public class Bank {
             return true
         }
         data = data.pairedMap(qubit.index, mapping: op, filter: filter)
+    }
+    
+    public func measure(qubit: Qubit, op: MeasurableOperator) {
+        
     }
 }
 

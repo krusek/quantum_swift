@@ -29,8 +29,21 @@ public indirect enum RandomAccessTree<Node> where Node: HasZero & Equatable {
         }
     }
     
+    public func reduce<Result>(initial: Result, closure: (Result, Node) -> Result) -> Result {
+        switch self {
+        case .leaf(let node):
+            return closure(initial, node)
+        case .tree(_, let lhs, let rhs):
+            let result = lhs.reduce(initial: initial, closure: closure)
+            return rhs.reduce(initial: result, closure: closure)
+        case .zero:
+            return initial
+        }
+    }
+    
     @discardableResult
     public mutating func set(index: Int, value: Node) -> RandomAccessTree<Node> {
+        if self[index] == value { return self }
         self = self.setDepth(self.depth, index, value)
         return self
     }
