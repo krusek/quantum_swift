@@ -1,10 +1,3 @@
-//
-//  BankTests.swift
-//  quantum_swiftTests
-//
-//  Created by Korben Rusek on 9/8/19.
-//
-
 import XCTest
 @testable import quantum_swift
 
