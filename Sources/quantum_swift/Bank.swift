@@ -27,13 +27,27 @@ extension RandomAccessTree where Node == Complex {
         }
         return tree
     }
-    
+
     static func - (lhs: RandomAccessTree, rhs: RandomAccessTree) -> RandomAccessTree {
         var r = (lhs.depth > rhs.depth) ? lhs : rhs
-        for ix in 0..<(1 << r.depth) {
-            r.set(index: ix, value:lhs[ix] - rhs[ix])
+        for ix in 0..<(1 << (r.depth + 1)) {
+            r.set(index: ix, value:(lhs[ix] - rhs[ix]) / 2)
         }
         return r
+    }
+
+    static func + (lhs: RandomAccessTree, rhs: RandomAccessTree) -> RandomAccessTree {
+        var r = (lhs.depth > rhs.depth) ? lhs : rhs
+        for ix in 0..<(1 << (r.depth + 1)) {
+            r.set(index: ix, value:(lhs[ix] + rhs[ix]) / 2)
+        }
+        return r
+    }
+
+    var probability: Double {
+        return self.reduce(initial: 0.0) { (result, complex) -> Double in
+            return result + complex.magnitudeSquared
+        }
     }
 }
 
@@ -69,8 +83,18 @@ public class Bank {
         data = data.pairedMap(qubit.index, mapping: op, filter: filter)
     }
     
-    public func measure(qubit: Qubit, op: MeasurableOperator) {
-        
+    public func measure(qubit: Qubit, op: MeasurableOperator) -> Complex {
+        assert(op.eigenvalues.count == 2)
+        assert(op.eigenvalues == [Complex.one, -Complex.one])
+        let mx = data.pairedMap(qubit.index, mapping: op.op)
+        let p = mx - data
+        print("p: \(p)")
+        let n = mx + data
+        print("n: \(n)")
+        let pp = p.probability
+        let pn = n.probability
+        print("n: \(n), p: \(p), pp: \(pp), pn: \(pn)")
+        return op.eigenvalues[0]
     }
 }
 

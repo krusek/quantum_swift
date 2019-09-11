@@ -39,6 +39,19 @@ class BankTests: XCTestCase {
     }
 }
 
+extension BankTests {
+    func testMeasurement() {
+        let bank = Bank()
+        let qs = bank.borrow(count: 2)
+        bank.operate(qubit: qs[0], op: h)
+        bank.operate(qubit: qs[1], controls: [], antiControls: [qs[0]], op: x)
+        print("bank: \(bank)")
+        bank.measure(qubit: qs[0], op: mz)
+        bank.measure(qubit: qs[1], op: mz)
+
+    }
+}
+
 protocol ComplexLookup {
     func value(_ index: Int) -> Complex
     var count: Int { get }
