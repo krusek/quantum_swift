@@ -1,23 +1,23 @@
 import XCTest
 @testable import quantum_swift
 
+let root1_2 = 1.0 / sqrt(2.0)
+
 class BankTests: XCTestCase {
     func testSimpleOperations() {
         let bank = Bank()
         let qs = bank.borrow(count: 1)
         bank.operate(qubit: qs[0], op: x)
-        XCTAssertTrue(equals(bank, [1: Complex.one]))
+        AssertEqual(bank, [1: 1.0])
         bank.operate(qubit: qs[0], op: x)
-        XCTAssertTrue(equals(bank, [0: Complex.one]))
+        AssertEqual(bank, [0: 1.0])
 
         bank.operate(qubit: qs[0], op: x)
         bank.operate(qubit: qs[0], op: h)
-        XCTAssertTrue(equals(bank, [0: Complex(real: 1.0/sqrt(2), imaginary: 0),
-                                    1: Complex(real: -1.0/sqrt(2), imaginary: 0)]))
+        AssertEqual(bank, [0: root1_2, 1: -root1_2])
         
         bank.operate(qubit: qs[0], op: z)
-        XCTAssertTrue(equals(bank, [0: Complex(real: 1.0/sqrt(2), imaginary: 0),
-                                    1: Complex(real: 1.0/sqrt(2), imaginary: 0)]))
+        AssertEqual(bank, [0: root1_2, 1: root1_2])
     }
 
     func testControlledOperations() {
@@ -25,8 +25,7 @@ class BankTests: XCTestCase {
         let qs = bank.borrow(count: 2)
         bank.operate(qubit: qs[0], op: h)
         bank.operate(qubit: qs[1], controls: [qs[0]], antiControls: [], op: x)
-        XCTAssertTrue(equals(bank, [0: Complex(real: 1.0/sqrt(2), imaginary: 0),
-                                    3: Complex(real: 1.0/sqrt(2), imaginary: 0)]))
+        AssertEqual(bank, [0: root1_2, 3: root1_2])
     }
 
     func testAntiControlledOperations() {
@@ -34,55 +33,26 @@ class BankTests: XCTestCase {
         let qs = bank.borrow(count: 2)
         bank.operate(qubit: qs[0], op: h)
         bank.operate(qubit: qs[1], controls: [], antiControls: [qs[0]], op: x)
-        XCTAssertTrue(equals(bank, [1: Complex(real: 1.0/sqrt(2), imaginary: 0),
-                                    2: Complex(real: 1.0/sqrt(2), imaginary: 0)]))
+        AssertEqual(bank, [1: root1_2, 2: root1_2])
     }
 }
 
 extension BankTests {
     func testMeasurement() {
-        let bank = Bank()
+        let (bank, qs) = bellState(generator: { 0.0 })
+        print("bank: \(bank)")
+        XCTAssertEqual(bank.measure(qubit: qs[0], op: mz), .real(1.0))
+        AssertEqual(bank, [1: 1.0])
+
+        XCTAssertEqual(bank.measure(qubit: qs[1], op: mz), .real(-1.0))
+        AssertEqual(bank, [1: 1.0])
+    }
+
+    private func bellState(generator: @escaping () -> Double) -> (Bank, [Qubit]) {
+        let bank = Bank(generator: generator)
         let qs = bank.borrow(count: 2)
         bank.operate(qubit: qs[0], op: h)
         bank.operate(qubit: qs[1], controls: [], antiControls: [qs[0]], op: x)
-        print("bank: \(bank)")
-        bank.measure(qubit: qs[0], op: mz)
-        bank.measure(qubit: qs[1], op: mz)
-
+        return (bank, qs)
     }
-}
-
-protocol ComplexLookup {
-    func value(_ index: Int) -> Complex
-    var count: Int { get }
-}
-
-extension Bank: ComplexLookup {
-    func value(_ index: Int) -> Complex {
-        return self.data[index]
-    }
-
-    var count: Int {
-        return 1 << self.data.depth
-    }
-}
-
-extension Array: ComplexLookup where Element == Complex {
-    func value(_ index: Int) -> Complex {
-        if index >= self.count { return Complex.zero }
-        return self[index]
-    }
-}
-
-extension Dictionary: ComplexLookup where Key == Int, Value == Complex {
-    func value(_ index: Int) -> Complex {
-        return self[index] ?? Complex.zero
-    }
-}
-
-func equals(_ lhs: ComplexLookup, _ rhs: ComplexLookup) -> Bool {
-    for ix in 0..<max(lhs.count, rhs.count) {
-        if lhs.value(ix) != rhs.value(ix) { return false }
-    }
-    return true
 }

@@ -21,19 +21,27 @@ public struct Complex {
     public static func polar(r: Double, theta: Double) -> Complex {
         return Complex(real: r * cos(theta), imaginary: r * sin(theta))
     }
+
+    public static func real(_ r: Double) -> Complex {
+        return Complex(real: r, imaginary: 0)
+    }
+
+    public static func imaginary(_ i: Double) -> Complex {
+        return Complex(real: 0, imaginary: i)
+    }
 }
 
 extension Complex: HasZero {
     public static var zero: Complex {
-        return Complex(real: 0, imaginary: 0)
+        return .real(0)
     }
     
     public static var one: Complex {
-        return Complex(real: 1, imaginary: 0)
+        return .real(1)
     }
     
     public static var i: Complex {
-        return Complex(real: 0, imaginary: 1)
+        return .imaginary(1)
     }
 }
 
@@ -61,7 +69,7 @@ extension Complex: AdditiveArithmetic {
 
 extension Complex {
     public static func * (lhs: Complex, rhs: Complex) -> Complex {
-        return Complex(real: lhs.real + rhs.real - lhs.imaginary * rhs.imaginary,
+        return Complex(real: lhs.real * rhs.real - lhs.imaginary * rhs.imaginary,
                        imaginary: lhs.real * rhs.imaginary + lhs.imaginary * rhs.real)
     }
     
@@ -88,5 +96,4 @@ extension Complex: Equatable {
     public static func ==(lhs: Complex, rhs: Complex) -> Bool {
         return abs(lhs.real - rhs.real) + abs(lhs.imaginary - rhs.imaginary) < 1e-6
     }
-    
 }
